@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <style>
+        .lamina-layout {
+          width: 100%;
+        }
+        
+        .lamina-layout-desktop {
+          overflow: hidden;
+        }
+        
+        .lamina-layout-desktop-inner {
+          flex: 0 0 var(--lamina-desktop-width, 100%);
+          width: var(--lamina-desktop-width, 100%);
+          max-width: none;
+          transform-origin: top center;
+        }
+        
+        .lamina-layout-mobile {
+          display: none;
+        }
+        
+        @media (min-width: 1025px) {
+          .lamina-layout-desktop {
+            display: flex !important;
+            justify-content: center;
+            align-items: flex-start;
+          }
+        
+          .lamina-layout-mobile {
+            display: none !important;
+          }
+        }
+        
+        @media (max-width: 1024px) {
+          .lamina-layout-desktop {
+            display: none !important;
+          }
+        
+          .lamina-layout-mobile {
+            display: block !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow-x: hidden !important;
+          }
+        
+          .lamina-layout-mobile > * {
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+        }
+        </style>
+    <style>
+        *, *::before, *::after {
+          box-sizing: border-box;
+        }
+        
+        body:not(.lamina-has-mobile-layout) img,
+        body:not(.lamina-has-mobile-layout) video,
+        body:not(.lamina-has-mobile-layout) iframe,
+        body:not(.lamina-has-mobile-layout) svg {
+          max-width: 100%;
+          height: auto;
+        }
+        
+        .lamina-wrapper {
+          content-visibility: auto;
+          contain-intrinsic-size: 1200px;
+          width: 100%;
+        }
+        
+        /* Custom elegant scrollbar inside the landing page */
+        ::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+          background: rgba(138, 138, 150, 0.3);
+          border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background: rgba(138, 138, 150, 0.5);
+        }
+        
+        @media (max-width: 1024px) {
+          /* Forçar o container principal (primeira div filha do body) a 100% largura e permitir rolagem */
+          html, body {
+            height: auto !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+          }
+        
+          body:not(.lamina-has-mobile-layout) > div,
+          body:not(.lamina-has-mobile-layout) .lamina-wrapper,
+          body:not(.lamina-has-mobile-layout) .lamina-wrapper > div {
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+        
+          body.lamina-has-mobile-layout .lamina-wrapper,
+          body.lamina-has-mobile-layout .lamina-layout-mobile {
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+        
+          /*
+           * Mobile/tablet image normalization.
+           * Remove this block if future exports should preserve image left offsets below 1024px.
+           */
+          /* lamina-qa: escopado para nao esticar as imagens do layout mobile dedicado */
+          body:not(.lamina-has-mobile-layout) img {
+            width: 100% !important;
+            left: 0px !important;
+          }
+        
+          /* Imagens: altura fluida em laminas sem layout mobile dedicado */
+          body:not(.lamina-has-mobile-layout) img {
+            height: auto !important;
+          }
+        
+          /* Containers flex/inline-flex: empilhar em coluna e ajustar altura */
+          body:not(.lamina-has-mobile-layout) [style*="inline-flex"],
+          body:not(.lamina-has-mobile-layout) [style*="display: flex"] {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            height: auto !important;
+          }
+        
+          /* Reduzir paddings laterais excessivos */
+          body:not(.lamina-has-mobile-layout) [style*="padding-left"],
+          body:not(.lamina-has-mobile-layout) [style*="padding-right"] {
+            padding-left: 16px !important;
+            padding-right: 16px !important;
+          }
+        
+          /* Quebra de texto */
+          body:not(.lamina-has-mobile-layout) [style*="white-space: nowrap"] {
+            white-space: normal !important;
+            overflow-wrap: break-word !important;
+          }
+        }
+        </style>
+    <style>
+        @media (max-width: 427px) {
+          body.lamina-has-mobile-layout .lamina-layout-mobile [data-lamina-fluid-small="true"] {
+            width: 100% !important;
+            max-width: 100% !important;
+            left: 0 !important;
+          }
+        }
+        
+        @media (min-width: 429px) and (max-width: 1000px) {
+          body.lamina-has-mobile-layout .lamina-layout-mobile [data-lamina-fluid-tablet="true"] {
+            width: 100% !important;
+            max-width: 100% !important;
+            left: 0 !important;
+          }
+        }
+        </style>
+    <style>
+    /* lamina-qa - escala proporcional da prancheta mobile (<= 1024px) */
+    @media (max-width: 1024px) {
+      body.lamina-has-mobile-layout .lamina-layout-mobile[data-lamina-fit] {
+        position: relative;
+        overflow: hidden !important;
+        height: var(--lamina-fit-height, auto);
+      }
+    
+      body.lamina-has-mobile-layout .lamina-layout-mobile[data-lamina-fit] > [data-lamina-fit-board] {
+        width: var(--lamina-fit-width, 428px) !important;
+        max-width: none !important;
+        margin-left: var(--lamina-fit-offset, 0px);
+        vertical-align: top;
+        transform: scale(var(--lamina-fit-scale, 1));
+        transform-origin: top left;
+      }
+    }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com" data-lamina-font-import="">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" data-lamina-font-import="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet" data-lamina-font-import="inter">
+    <style data-lamina-font-import="elza">
+    @font-face {
+      font-family: "Elza";
+      src: url("https://multilaser.vteximg.com.br/arquivos/Elza-Regular.ttf.css") format("truetype");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    
+    @font-face {
+      font-family: "Elza";
+      src: url("https://multilaser.vteximg.com.br/arquivos/Elza-Bold.ttf.css") format("truetype");
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+    </style>
+  <style>
+/* hc560 - ajustes de QA contra o Figma */
+
+/* SVG inline na linha de base descia os vetores pequenos (letras de "SAUDE", pingo do "i" do logo). */
+.lamina-wrapper [data-svg-wrapper] > svg {
+  display: block;
+}
+
+/* Textos que no Figma terminam com quebra de linha (linha vazia extra): a altura conta para centralizar o bloco. */
+.lamina-layout-mobile .hc560-60 {
+  min-height: 200px;
+}
+.lamina-layout-desktop .hc560-60 {
+  min-height: 180px;
+}
+.lamina-layout-desktop .hc560-51 {
+  min-height: 150px;
+}
+
+/* Linha de icones: no Figma o conteudo (1356px) passa da area util e transborda centralizado; no flex as colunas encolhiam. */
+.lamina-layout-desktop .hc560-13,
+.lamina-layout-desktop .hc560-25 {
+  flex-shrink: 0;
+}
+
+/* Ficha tecnica: paragraphSpacing de 7px do Figma (perdido no export) e linha vazia final. */
+.lamina-wrapper .hc560-ficha-item + .hc560-ficha-item {
+  margin-top: 7px;
+}
+.lamina-layout-desktop .hc560-67 {
+  min-height: 490px;
+}
+.lamina-layout-mobile .hc560-67 {
+  min-height: 598px;
+}
+</style>
+</head>
+  <body class="lamina-has-mobile-layout" style="overflow-x: hidden">
+    <div class="lamina-wrapper">
+      <div class="lamina-layout lamina-layout-desktop" data-design-width="1920" style="--lamina-desktop-width: 1920px">
+        <div class="lamina-layout-desktop-inner">
+          <div class="hc560-1" style="width: 1920px; height: 9523px; background: white; overflow: hidden; flex-direction: column; justify-content: flex-start; align-items: center; gap: 45px; display: inline-flex">
+            <div class="hc560-2" style="width: 1922px; height: 803px; position: relative; overflow: hidden">
+              <img class="hc560-3" style="width: 1920px; height: 803px; left: 1px; top: 0px; position: absolute" src="assets/hc560-1.png" decoding="async" fetchpriority="high" loading="eager">
+              <!-- hc560: removidas as mascaras pretas do logo (base de mascara do Figma) -->
+              <div data-svg-wrapper="" class="hc560-5" style="left: 310.76px; top: 128.87px; position: absolute">
+                <svg width="31" height="35" viewBox="0 0 31 35" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M26.6442 0C24.3301 0 22.9129 1.40414 22.9129 3.69685V20.1877C22.9129 25.3648 20.3015 27.9521 15.2249 27.9521C10.1483 27.9521 7.46258 25.3648 7.46258 20.1877V3.69685C7.46258 1.40414 6.04536 0 3.73129 0C1.41722 0 0 1.40414 0 3.69685V20.1877C0 29.2826 5.82235 34.9775 15.1506 34.9775C24.4788 34.9775 30.3755 29.2826 30.3755 20.1877V3.69685C30.3755 1.40414 28.9583 0 26.6442 0Z" fill="#14C850">
+                  </path>
+                </svg>
+              </div>
+              <div data-svg-wrapper="" class="hc560-5" style="left: 350.46px; top: 116px; position: absolute">
+                <svg width="8" height="48" viewBox="0 0 8 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3.73129 0C1.41722 0 0 1.48017 0 3.7705V43.7753C0 46.0681 1.41722 47.5458 3.73129 47.5458C6.04536 47.5458 7.46257 46.0681 7.46257 43.7753V3.7705C7.46497 1.47779 6.04536 0 3.73129 0Z" fill="#14C850">
+                  </path>
+                </svg>
+              </div>
+              <div data-svg-wrapper="" class="hc560-5" style="left: 245px; top: 120.51px; position: absolute">
+                <svg width="57" height="44" viewBox="0 0 57 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M45.5284 0C38.8116 0 35.0803 3.6232 34.3322 10.7959L32.0924 32.6111C31.8694 34.7566 30.5241 35.8637 28.2101 35.8637C25.896 35.8637 24.5531 34.7542 24.3301 32.6111L22.0904 10.7959C21.3446 3.6232 17.6109 0 10.8941 0C4.17732 0 0 4.13876 0 10.7959V39.2659C0 41.5587 1.41722 43.0364 3.73129 43.0364C6.04536 43.0364 7.46258 41.5587 7.46258 39.2659V10.7959C7.46258 8.50323 8.80546 7.09909 11.0452 7.09909C13.2849 7.09909 14.4048 8.35592 14.6278 10.7959L16.8675 32.6111C17.6133 39.5629 21.4213 43.0364 28.2125 43.0364C35.0036 43.0364 38.8116 39.5606 39.5574 32.6111L41.7971 10.7959C42.0202 8.35592 43.2144 7.09909 45.3798 7.09909C47.5451 7.09909 48.9624 8.50323 48.9624 10.7959V39.2659C48.9624 41.5587 50.3796 43.0364 52.6937 43.0364C55.0077 43.0364 56.4249 41.5587 56.4249 39.2659V10.7959C56.4249 4.14114 52.2452 0 45.5284 0Z" fill="#14C850">
+                  </path>
+                </svg>
+              </div>
+              <div data-svg-wrapper="" class="hc560-5" style="left: 401.14px; top: 128.87px; position: absolute">
+                <svg width="8" height="35" viewBox="0 0 8 35" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3.73129 0C1.41722 0 0 1.48016 0 3.7705V30.91C0 33.2027 1.41722 34.6805 3.73129 34.6805C6.04536 34.6805 7.46257 33.2027 7.46257 30.91V3.7705C7.46257 1.47779 6.04536 0 3.73129 0Z" fill="#14C850">
+                  </path>
+                </svg>
+              </div>
+              <div data-svg-wrapper="" class="hc560-5" style="left: 400.32px; top: 116px; position: absolute">
+                <svg width="10" height="9" viewBox="0 0 10 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M4.5538 8.87386C7.24196 8.87386 9.1076 7.02544 9.1076 4.43812C9.1076 1.8508 7.23956 0 4.5538 0C1.86804 0 0 1.84842 0 4.43574C0 7.02306 1.86564 8.87149 4.5538 8.87149" fill="#14C850">
+                  </path>
+                </svg>
+              </div>
+              <div data-svg-wrapper="" class="hc560-5" style="left: 363.52px; top: 120.51px; position: absolute">
+                <svg width="30" height="44" viewBox="0 0 30 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M26.4955 35.6428C25.1526 35.6428 23.733 36.308 21.8674 36.308C17.539 36.308 15.2992 33.9416 15.2992 29.2826V15.3814H25.8217C28.1357 15.3814 29.5529 14.1245 29.5529 12.0528C29.5529 9.98102 28.1357 8.72418 25.8217 8.72418H15.2992V3.7705C15.2992 1.47779 13.882 0 11.6423 0C9.40255 0 7.98534 1.48016 7.98534 3.7705V8.72418H3.73129C1.41722 8.72418 0 9.98102 0 12.0528C0 14.1245 1.41722 15.3814 3.73129 15.3814H7.98534V29.2826C7.98534 37.9331 13.2849 43.3334 21.8674 43.3334C25.3013 43.3334 29.927 42.3712 29.927 39.1923C29.927 37.2702 28.6585 35.6428 26.4931 35.6428" fill="#14C850">
+                  </path>
+                </svg>
+              </div>
+              <div data-svg-wrapper="" class="hc560-5" style="left: 245.75px; top: 174.96px; position: absolute">
+                <svg width="12" height="16" viewBox="0 0 12 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M0 10.5774H1.83207C2.04549 13.0055 3.81282 13.9131 6.05015 13.9131C8.05248 13.9131 9.77905 13.0483 9.77905 11.2949V11.1476C9.77905 9.71254 8.7575 8.93088 5.56096 8.38206C1.81049 7.7477 0.553938 6.44098 0.553938 4.30745V4.09599C0.553938 1.83654 2.57785 0 5.77438 0C8.73592 0 10.9517 1.4564 11.2922 4.45237H9.46011C9.20352 2.51129 7.7983 1.56094 5.77438 1.56094C3.75047 1.56094 2.32366 2.51129 2.32366 4.07223V4.21954C2.32366 5.6118 3.19653 6.32931 6.17965 6.81636C9.73828 7.38657 11.5704 8.58876 11.5704 11.0383V11.2497C11.5704 13.6351 9.52486 15.493 5.96622 15.493C2.40759 15.493 0.170258 13.8038 0 10.575" fill="#14C850">
+                  </path>
+                </svg>
+              </div>
+              <div data-svg-wrapper="" class="hc560-5" style="left: 258.02px; top: 175.21px; position: absolute">
+                <svg width="14" height="15" viewBox="0 0 14 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M11.8437 14.987L10.2682 10.891H3.40756L1.83207 14.987H0L5.90148 0H7.86064L13.7621 14.987H11.8437ZM4.00466 9.35141H9.67113L6.8367 1.98385L4.00226 9.35141H4.00466Z" fill="#14C850">
+                  </path>
+                </svg>
+              </div>
+              <div data-svg-wrapper="" class="hc560-5" style="left: 272.86px; top: 170.65px; position: absolute">
+                <svg width="12" height="20" viewBox="0 0 12 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M0 13.9107V4.55929H1.81049V13.8466C1.81049 16.738 3.2373 18.1944 5.90148 18.1944C8.56566 18.1944 9.9493 16.7166 9.9493 13.8252V4.55929H11.7598V13.8893C11.7598 17.5624 9.77904 19.8005 5.90148 19.8005C2.02391 19.8005 0 17.6052 0 13.9107ZM4.60176 2.87005L7.11487 0H9.86298L6.49618 2.87005H4.59937H4.60176Z" fill="#14C850">
+                  </path>
+                </svg>
+              </div>
+              <div data-svg-wrapper="" class="hc560-5" style="left: 287.41px; top: 175.21px; position: absolute">
+                <svg width="13" height="15" viewBox="0 0 13 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M0 14.987V0H4.94228C9.26827 0 12.249 2.53267 12.249 7.19888V7.79046C12.249 12.4139 9.30904 14.9893 4.94228 14.9893H0V14.987ZM1.81049 13.426H4.7936C8.22274 13.426 10.3761 11.6322 10.3761 7.79046V7.19888C10.3761 3.39987 8.24672 1.56332 4.75044 1.56332H1.81049V13.426Z" fill="#14C850">
+                  </path>
+                </svg>
+              </div>
+              <div data-svg-wrapper="" class="hc560-5" style="left: 301.96px; top: 175.21px; position: absolute">
+                <svg width="11" height="15" viewBox="0 0 11 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M0 14.987V0H9.9493V1.56332H1.80809V6.54314H9.30903V8.10646H1.80809V13.426H10.0548V14.987H0Z" fill="#14C850">
+                  </path>
+                </svg>
+              </div>
+              <div class="hc560-5" style="left: 245px; top: 293px; position: absolute">
+                <span style="color: black; font-size: 62px; font-family: Elza; font-weight: 600; line-height: 74.40px; word-wrap: break-word">Irrigador Oral<br>
+                </span>
+                <span style="color: #14C850; font-size: 81.64px; font-family: Elza; font-weight: 700; line-height: 97.97px; word-wrap: break-word">Clearpik Personal</span>
+              </div>
+              <div class="hc560-7" style="width: 574px; height: 57px; left: 245px; top: 494px; position: absolute">
+                <div class="hc560-8" style="width: 570px; height: 57px; left: 0px; top: 0px; position: absolute; background: rgba(20, 200, 80, 0.10); border-radius: 12.94px">
+                </div>
+                <div class="hc560-9" style="left: 60.51px; top: 14.33px; position: absolute; color: black; font-size: 23.73px; font-family: Inter; font-weight: 400; word-wrap: break-word">O cuidado avançado para sua higiene bucal</div>
+                <div class="hc560-10" style="width: 32px; height: 32px; left: 16px; top: 13px; position: absolute; overflow: hidden">
+                  <div data-svg-wrapper="" class="hc560-5" style="left: 0px; top: 0px; position: absolute">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M25.4281 17.5229L17.8856 25.0653C16.8442 26.1067 15.1558 26.1067 14.1144 25.0653L6.57191 17.5229C3.96842 14.9194 3.96842 10.6983 6.57191 8.09477C9.17541 5.49128 13.3965 5.49128 16 8.09477C18.6035 5.49128 22.8246 5.49128 25.4281 8.09477C28.0316 10.6983 28.0316 14.9194 25.4281 17.5229Z" stroke="#14C850" stroke-width="2.66667" stroke-linecap="round" stroke-linejoin="round">
+                      </path>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="hc560-12" style="align-self: stretch; height: 503px; padding-left: 236px; padding-right: 236px; padding-top: 46px; padding-bottom: 46px; overflow: hidden; flex-direction: column; justify-content: flex-start; align-items: center; gap: 38px; display: flex">
+              <div class="hc560-12" style="width: 1434px; height: 426px; padding-left: 122px; padding-right: 122px; justify-content: center; align-items: flex-start; gap: 87px; display: inline-flex">
+                <div class="hc560-13" style="width: 194px; flex-direction: column; justify-content: flex-start; align-items: center; gap: 31px; display: inline-flex">
+                  <img class="hc560-14" style="width: 178px; height: 177px" src="assets/hc560-2.png" decoding="async" loading="lazy">
+                  <div class="hc560-15" style="width: 214px; text-align: center; color: black; font-size: 25px; font-family: Elza; font-weight: 700; word-wrap: break-word">Jatos pulsantes de alta frequência</div>
+                  <div class="hc560-16" style="width: 214px; text-align: center; color: black; font-size: 22px; font-family: Elza; font-weight: 400; word-wrap: break-word">Remoção de impurezas com suavidade e precisão. </div>
+                </div>
+                <div class="hc560-13" style="width: 194px; flex-direction: column; justify-content: flex-start; align-items: center; gap: 31px; display: inline-flex">
+                  <img class="hc560-14" style="width: 178px; height: 177px" src="assets/hc560-3.png" decoding="async" loading="lazy">
+                  <div class="hc560-19" style="align-self: stretch; text-align: center; color: black; font-size: 25px; font-family: Elza; font-weight: 700; word-wrap: break-word">3 modos de intensidade </div>
+                  <div class="hc560-20" style="align-self: stretch; text-align: center; color: black; font-size: 22px; font-family: Elza; font-weight: 400; word-wrap: break-word">Padrão, Suave e Massagem para cada necessidade. </div>
+                </div>
+                <div class="hc560-13" style="width: 194px; flex-direction: column; justify-content: flex-start; align-items: center; gap: 31px; display: inline-flex">
+                  <img class="hc560-14" style="width: 178px; height: 177px" src="assets/hc560-4.png" decoding="async" loading="lazy">
+                  <div class="hc560-19" style="align-self: stretch; text-align: center; color: black; font-size: 25px; font-family: Elza; font-weight: 700; word-wrap: break-word">Modo <br>Dinâmico</div>
+                  <div class="hc560-24" style="width: 178px; text-align: center; color: black; font-size: 22px; font-family: Elza; font-weight: 400; word-wrap: break-word">10 níveis de pressão para o seu conforto.</div>
+                </div>
+                <div class="hc560-25" style="width: 232px; flex-direction: column; justify-content: flex-start; align-items: center; gap: 31px; display: inline-flex">
+                  <img class="hc560-14" style="width: 178px; height: 177px" src="assets/hc560-5.png" decoding="async" loading="lazy">
+                  <div class="hc560-27" style="width: 232px; text-align: center; color: black; font-size: 25px; font-family: Elza; font-weight: 700; word-wrap: break-word">Bico giratório <br>360°</div>
+                  <div class="hc560-24" style="width: 178px; text-align: center; color: black; font-size: 22px; font-family: Elza; font-weight: 400; word-wrap: break-word">Alcance em todas as áreas da boca.  </div>
+                </div>
+                <div class="hc560-13" style="width: 194px; flex-direction: column; justify-content: flex-start; align-items: center; gap: 31px; display: inline-flex">
+                  <img class="hc560-14" style="width: 178px; height: 177px" src="assets/hc560-6.png" decoding="async" loading="lazy">
+                  <div class="hc560-31" style="width: 194px; text-align: center; color: black; font-size: 25px; font-family: Elza; font-weight: 700; word-wrap: break-word">Reservatório <br>de 280 ml </div>
+                  <div class="hc560-20" style="align-self: stretch; text-align: center; color: black; font-size: 22px; font-family: Elza; font-weight: 400; word-wrap: break-word">Reabastecimento fácil e rápido sob a torneira.</div>
+                </div>
+              </div>
+            </div>
+            <div class="hc560-33" style="align-self: stretch; height: 1154px; background: #F5F5F5; flex-direction: column; justify-content: center; align-items: center; gap: 64px; display: flex">
+              <img class="hc560-34" style="width: 1440px; height: 725px" src="assets/hc560-7.png" decoding="async" loading="lazy">
+              <div class="hc560-35" style="width: 996px; flex-direction: column; justify-content: center; align-items: center; gap: 30px; display: flex">
+                <div class="hc560-36" style="text-align: center; color: black; font-size: 62px; font-family: Elza; font-weight: 400; word-wrap: break-word">Complementa a limpeza <br>onde a escova não alcança</div>
+                <div class="hc560-37" style="width: 902px; text-align: center; color: black; font-size: 25px; font-family: Elza; font-weight: 400; word-wrap: break-word">O Clearpik Personal remove resíduos e impurezas acumulados entre os dentes e abaixo da linha da gengiva. Alcança áreas de difícil acesso para as escovas tradicionais, proporcionando uma sensação de higiene e frescor profunda.</div>
+              </div>
+            </div>
+            <div class="hc560-38" style="width: 1920px; height: 803px; position: relative; background: white; overflow: hidden">
+              <div class="hc560-33" style="left: 286px; top: 39px; position: absolute; background: white; justify-content: flex-start; align-items: center; gap: 101px; display: inline-flex">
+                <div class="hc560-35" style="width: 547px; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 30px; display: inline-flex">
+                  <div class="hc560-39" style="width: 566px; color: black; font-size: 64px; font-family: Elza; font-weight: 400; word-wrap: break-word">Pulsos invisíveis, <br>cuidado perceptível</div>
+                  <div class="hc560-40" style="width: 438px; color: black; font-size: 25px; font-family: Elza; font-weight: 400; word-wrap: break-word">A combinação de pressão da água com pulsos de alta frequência (1.200 a 1.400 por minuto) auxilia a desprender detritos com suavidade e precisão. </div>
+                </div>
+                <img class="hc560-41" style="width: 701px; height: 726px; position: relative; border-radius: 16px" src="assets/hc560-8.png" decoding="async" loading="lazy">
+              </div>
+            </div>
+            <div class="hc560-33" style="align-self: stretch; height: 840px; background: #F5F5F5; flex-direction: column; justify-content: center; align-items: center; gap: 53px; display: flex">
+              <div class="hc560-42" style="align-self: stretch; padding-left: 244px; padding-right: 244px; padding-top: 1px; padding-bottom: 1px; overflow: hidden; justify-content: flex-start; align-items: center; gap: 73px; display: inline-flex">
+                <div class="hc560-41" style="width: 701px; height: 726px; position: relative; background: white; overflow: hidden; border-radius: 16px">
+                  <img class="hc560-43" style="width: 701px; height: 150px; left: 0px; top: 576px; position: absolute" src="assets/hc560-9.png" decoding="async" loading="lazy">
+                  <img class="hc560-44" style="width: 700px; height: 707px; left: 1px; top: 0px; position: absolute" src="assets/hc560-10.png" decoding="async" loading="lazy">
+                </div>
+                <div class="hc560-45" style="width: 603px; overflow: hidden; flex-direction: column; justify-content: center; align-items: flex-start; gap: 40px; display: inline-flex">
+                  <div class="hc560-46" style="width: 589px; color: black; font-size: 64px; font-family: Elza; font-weight: 400; word-wrap: break-word">Ajustes simples para a sua preferência</div>
+                  <div class="hc560-47" style="align-self: stretch; text-align: center; color: black; font-size: 25px; font-family: Elza; font-weight: 400; word-wrap: break-word">Escolha entre os 3 modos de uso com um toque rápido. </div>
+                  <img class="hc560-48" style="width: 511px; height: 435px" src="assets/hc560-11.png" decoding="async" loading="lazy">
+                </div>
+              </div>
+            </div>
+            <div class="hc560-38" style="width: 1920px; height: 803px; position: relative; background: white; overflow: hidden">
+              <div class="hc560-33" style="left: 285.50px; top: 39px; position: absolute; background: white; justify-content: flex-start; align-items: center; gap: 101px; display: inline-flex">
+                <div class="hc560-35" style="width: 547px; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 30px; display: inline-flex">
+                  <div class="hc560-50" style="align-self: stretch; color: black; font-size: 64px; font-family: Elza; font-weight: 400; word-wrap: break-word">Dez níveis<br>de conforto<br>a sua escolha</div>
+                  <div class="hc560-51" style="width: 390px; color: black; font-size: 25px; font-family: Elza; font-weight: 400; word-wrap: break-word">Ao ativar o Modo Dinâmico, você conta com 10 níveis de pressão ajustáveis para encontrar a intensidade ideal para o seu sorriso. <br>
+                  </div>
+                </div>
+                <img class="hc560-41" style="width: 701px; height: 726px; position: relative; border-radius: 16px" src="assets/hc560-12.png" decoding="async" loading="lazy">
+              </div>
+            </div>
+            <div class="hc560-52" style="width: 1920px; height: 1017px; position: relative; background: #F5F5F5; overflow: hidden">
+              <div class="hc560-53" style="left: 429px; top: 26px; position: absolute; text-align: center; color: black; font-size: 64px; font-family: Elza; font-weight: 400; word-wrap: break-word">Praticidade projetada para o manuseio</div>
+              <div class="hc560-33" style="left: 979px; top: 148px; position: absolute; flex-direction: column; justify-content: center; align-items: flex-start; gap: 20px; display: inline-flex">
+                <img class="hc560-41" style="width: 701px; height: 665px; position: relative; border-radius: 16px" src="assets/hc560-13.png" decoding="async" loading="lazy">
+                <div class="hc560-35" style="width: 701px; height: 151px; padding-left: 51px; padding-right: 51px; flex-direction: column; justify-content: center; align-items: center; display: flex">
+                  <div class="hc560-54" style="width: 575px; text-align: center; color: black; font-size: 25px; font-family: Elza; font-weight: 400; word-wrap: break-word">O amplo reservatório de 280 ml possui abertura prática para reabastecimento fácil e rápido diretamente na torneira. </div>
+                </div>
+              </div>
+              <div class="hc560-33" style="left: 245px; top: 148px; position: absolute; flex-direction: column; justify-content: center; align-items: flex-start; gap: 20px; display: inline-flex">
+                <img class="hc560-41" style="width: 701px; height: 665px; position: relative; background: white; border-radius: 16px" src="assets/hc560-14.png" decoding="async" loading="lazy">
+                <div class="hc560-35" style="width: 701px; height: 151px; padding-left: 51px; padding-right: 51px; flex-direction: column; justify-content: center; align-items: center; display: flex">
+                  <div class="hc560-55" style="width: 381px; text-align: center; color: black; font-size: 25px; font-family: Elza; font-weight: 400; word-wrap: break-word">O bico com rotação 360° facilita o direcionamento do jato para todos os cantos da boca. </div>
+                </div>
+              </div>
+            </div>
+            <div class="hc560-38" style="width: 1920px; height: 803px; position: relative; background: white; overflow: hidden">
+              <div class="hc560-33" style="left: 286px; top: 39px; position: absolute; background: white; justify-content: flex-start; align-items: center; gap: 101px; display: inline-flex">
+                <div class="hc560-35" style="width: 547px; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 30px; display: inline-flex">
+                  <div class="hc560-39" style="width: 566px; color: black; font-size: 64px; font-family: Elza; font-weight: 400; word-wrap: break-word">Pronto para acompanhar sua rotina</div>
+                  <div class="hc560-57" style="width: 490px; color: black; font-size: 25px; font-family: Elza; font-weight: 400; word-wrap: break-word">Recarregável com cabo de entrada USB-C e encaixe próprio para o irrigador*. Bivolt e com desligamento automático após 2 minutos, foi desenvolvido para facilitar o cuidado bucal onde você estiver.<br>
+                    <br>*Cabo de carregamento incluído.</div>
+                  </div>
+                  <img class="hc560-41" style="width: 701px; height: 726px; position: relative; border-radius: 16px" src="assets/hc560-15.png" decoding="async" loading="lazy">
+                </div>
+              </div>
+              <div class="hc560-38" style="width: 1920px; height: 803px; position: relative; background: white; overflow: hidden">
+                <div class="hc560-33" style="left: 285.50px; top: 39px; position: absolute; background: white; justify-content: flex-start; align-items: center; gap: 101px; display: inline-flex">
+                  <img class="hc560-41" style="width: 701px; height: 726px; position: relative; border-radius: 16px" src="assets/hc560-16.png" decoding="async" loading="lazy">
+                  <div class="hc560-35" style="width: 547px; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 30px; display: inline-flex">
+                    <div class="hc560-50" style="align-self: stretch; color: black; font-size: 64px; font-family: Elza; font-weight: 400; word-wrap: break-word">Resistente à água </div>
+                    <div class="hc560-60" style="width: 486px; color: black; font-size: 25px; font-family: Elza; font-weight: 400; word-wrap: break-word">Com classificação IPX7 à prova d'água, o irrigador suporta submersão de até 1 metro de profundidade por até 30 minutos em água. Uma proteção que garante total tranquilidade, liberdade e segurança no uso.<br>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="hc560-38" style="width: 1920px; height: 803px; position: relative; background: white; overflow: hidden">
+                <div class="hc560-33" style="left: 286px; top: 39px; position: absolute; background: white; justify-content: flex-start; align-items: center; gap: 101px; display: inline-flex">
+                  <div class="hc560-35" style="width: 547px; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 30px; display: inline-flex">
+                    <div class="hc560-39" style="width: 566px; color: black; font-size: 64px; font-family: Elza; font-weight: 400; word-wrap: break-word">Higienização<br>sem complicações</div>
+                    <div class="hc560-57" style="width: 490px; color: black; font-size: 25px; font-family: Elza; font-weight: 400; word-wrap: break-word">Com poucos movimentos, você complementa a escovação do dia a dia. Basta posicionar o bico na boca, mantê-la levemente aberta e percorrer os dentes traseiros até os da frente. </div>
+                  </div>
+                  <img class="hc560-41" style="width: 701px; height: 726px; position: relative; border-radius: 16px" src="assets/hc560-17.png" decoding="async" loading="lazy">
+                </div>
+              </div>
+              <div class="hc560-64" style="width: 1920px; height: 731px; position: relative; background: #E2FFEC; overflow: hidden">
+                <div data-svg-wrapper="" class="hc560-5" style="left: 893.10px; top: -62.71px; position: absolute">
+                  <svg width="1027" height="731" viewBox="0 0 1027 731" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path opacity="0.3" d="M975.732 -62.71C831.782 -62.71 751.816 14.9397 735.782 168.661L687.781 636.188C683.002 682.167 654.171 705.895 604.577 705.895C554.984 705.895 526.204 682.116 521.425 636.188L473.425 168.661C457.442 14.9397 377.424 -62.71 233.475 -62.71C89.5251 -62.71 0 25.9889 0 168.661L0 778.809C0 827.945 30.3728 859.615 79.9662 859.615C129.56 859.615 159.932 827.945 159.932 778.809L159.932 168.661C159.932 119.525 188.712 89.4325 236.712 89.4325C284.713 89.4325 308.713 116.368 313.492 168.661L361.492 636.188C377.475 785.174 459.086 859.615 604.629 859.615C750.171 859.615 831.782 785.123 847.765 636.188L895.765 168.661C900.545 116.368 926.138 89.4325 972.545 89.4325C1018.95 89.4325 1049.33 119.525 1049.33 168.661V778.809C1049.33 827.945 1079.7 859.615 1129.29 859.615C1178.88 859.615 1209.26 827.945 1209.26 778.809V168.661C1209.26 26.0398 1119.68 -62.71 975.732 -62.71Z" fill="url(#paint0_linear_65_225)">
+                    </path>
+                    <defs>
+                      <linearGradient id="paint0_linear_65_225" x1="604.629" y1="-62.71" x2="604.629" y2="859.615" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#14C850">
+                        </stop>
+                        <stop offset="1" stop-color="#0A6227" stop-opacity="0">
+                        </stop>
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+                <div class="hc560-65" style="height: 713px; left: 243px; top: 16px; position: absolute; justify-content: flex-start; align-items: center; gap: 163px; display: inline-flex">
+                  <div class="hc560-35" style="width: 572px; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 30px; display: inline-flex">
+                    <div class="hc560-66" style="align-self: stretch; color: black; font-size: 64px; font-family: Inter; font-weight: 400; word-wrap: break-word">Ficha técnica</div>
+                    <div class="hc560-67" style="width: 490px">
+<div class="hc560-ficha-item"><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 700; line-height: 28px; word-wrap: break-word">Marca:</span><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 400; line-height: 28px; word-wrap: break-word"> Multi Saúde
+                      </span></div>
+<div class="hc560-ficha-item"><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 700; line-height: 28px; word-wrap: break-word">Dimensões:</span><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 400; line-height: 28px; word-wrap: break-word"> 7,35 x 8,8 x 22,7cm 
+                      </span></div>
+<div class="hc560-ficha-item"><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 700; line-height: 28px; word-wrap: break-word">Peso líquido:</span><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 400; line-height: 28px; word-wrap: break-word"> 358 g
+                      </span></div>
+<div class="hc560-ficha-item"><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 700; line-height: 28px; word-wrap: break-word">Energia: </span><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 400; line-height: 28px; word-wrap: break-word">voltagem 100-240 V (Bivolt) 
+                      </span></div>
+<div class="hc560-ficha-item"><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 700; line-height: 28px; word-wrap: break-word">Potência:</span><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 400; line-height: 28px; word-wrap: break-word"> 5 W 
+                      </span></div>
+<div class="hc560-ficha-item"><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 700; line-height: 28px; word-wrap: break-word">Tempo de carga:</span><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 400; line-height: 28px; word-wrap: break-word"> 4 horas.
+                      </span></div>
+<div class="hc560-ficha-item"><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 700; line-height: 28px; word-wrap: break-word">Desempenho: </span><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 400; line-height: 28px; word-wrap: break-word">pressão de 20 a 115 PSI e ruído discreto abaixo de 72 decibéis.</span></div>
+<div class="hc560-ficha-item"><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 400; line-height: 28px; word-wrap: break-word">Função memória automática para o último modo ativo por mais de 10 segundos.
+                      </span></div>
+<div class="hc560-ficha-item"><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 700; line-height: 28px; word-wrap: break-word">Conteúdo da embalagem</span><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 400; line-height: 28px; word-wrap: break-word">: 1 irrigador oral portátil, 2 bicos clássicos, 1 cabo de carregamento e 1 manual de instruções.
+                      </span></div>
+<div class="hc560-ficha-item"><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 700; line-height: 28px; word-wrap: break-word">Garantia: </span><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 400; line-height: 28px; word-wrap: break-word">1 ano 
+                      </span></div>
+                    </div>
+                  </div>
+                  <img class="hc560-68" style="width: 650px; height: 722px" src="assets/hc560-18.png" decoding="async" loading="lazy">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="lamina-layout lamina-layout-mobile" data-lamina-fit="">
+          <div class="hc560-69" data-lamina-fit-board="428" style="width: 428px; height: 9202px; background: white; overflow: hidden; flex-direction: column; justify-content: flex-start; align-items: center; gap: 52px; display: inline-flex">
+            <div class="hc560-70" style="width: 428px; height: 750px; position: relative; background: #E2FFEC; overflow: hidden">
+              <img class="hc560-71" style="width: 428px; height: 750px; left: 0px; top: 0px; position: absolute" src="assets/hc560-19.png" decoding="async" loading="lazy">
+              <div class="hc560-6" style="left: 39px; top: 114.27px; position: absolute; text-align: center">
+                <span style="color: black; font-size: 33.25px; font-family: Elza; font-weight: 600; word-wrap: break-word">Irrigador Oral<br>
+                </span>
+                <span style="color: #14C850; font-size: 44px; font-family: Elza; font-weight: 600; word-wrap: break-word">Clearpik Personal</span>
+              </div>
+              <div class="hc560-7" style="width: 378px; height: 40px; left: 28px; top: 218px; position: absolute">
+                <div class="hc560-8" style="width: 387px; height: 39px; left: 0px; top: 0px; position: absolute; background: rgba(20, 200, 80, 0.10); border-radius: 8.93px">
+                </div>
+                <div class="hc560-9" style="left: 52.39px; top: 9.89px; position: absolute; color: black; font-size: 15px; font-family: Inter; font-weight: 400; word-wrap: break-word">O cuidado avançado para sua higiene bucal</div>
+                <div class="hc560-10" style="width: 32px; height: 32px; left: 16px; top: 4px; position: absolute; overflow: hidden">
+                  <div data-svg-wrapper="" class="hc560-5" style="left: 0px; top: 0px; position: absolute">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M25.4282 17.5228L17.8857 25.0653C16.8443 26.1067 15.1559 26.1067 14.1145 25.0653L6.57201 17.5228C3.96851 14.9194 3.96851 10.6983 6.57201 8.09476C9.1755 5.49126 13.3966 5.49126 16.0001 8.09476C18.6036 5.49126 22.8247 5.49126 25.4282 8.09476C28.0317 10.6983 28.0317 14.9194 25.4282 17.5228Z" stroke="#14C850" stroke-width="2.66667" stroke-linecap="round" stroke-linejoin="round">
+                      </path>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div data-svg-wrapper="" class="hc560-5" style="left: 71.25px; top: 51.20px; position: absolute">
+                <svg width="20" height="23" viewBox="0 0 20 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M17.5231 0C16.0012 0 15.0692 0.923462 15.0692 2.43131V13.2769C15.0692 16.6817 13.3517 18.3833 10.013 18.3833C6.67428 18.3833 4.90793 16.6817 4.90793 13.2769V2.43131C4.90793 0.923462 3.97586 0 2.45396 0C0.932065 0 0 0.923462 0 2.43131V13.2769C0 19.2583 3.8292 23.0037 9.96411 23.0037C16.099 23.0037 19.9771 19.2583 19.9771 13.2769V2.43131C19.9771 0.923462 19.045 0 17.5231 0Z" fill="#14C850">
+                  </path>
+                </svg>
+              </div>
+              <div data-svg-wrapper="" class="hc560-5" style="left: 97.36px; top: 42.74px; position: absolute">
+                <svg width="5" height="32" viewBox="0 0 5 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2.45396 0C0.932064 0 0 0.973463 0 2.47975V28.7898C0 30.2977 0.932064 31.2696 2.45396 31.2696C3.97586 31.2696 4.90793 30.2977 4.90793 28.7898V2.47975C4.9095 0.971901 3.97586 0 2.45396 0Z" fill="#14C850">
+                  </path>
+                </svg>
+              </div>
+              <div data-svg-wrapper="" class="hc560-5" style="left: 28px; top: 45.70px; position: absolute">
+                <svg width="38" height="29" viewBox="0 0 38 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M29.9428 0C25.5253 0 23.0714 2.38288 22.5793 7.10019L21.1063 21.4474C20.9596 22.8584 20.0749 23.5866 18.553 23.5866C17.0311 23.5866 16.1479 22.8569 16.0012 21.4474L14.5282 7.10019C14.0377 2.38288 11.5822 0 7.16476 0C2.7473 0 0 2.72195 0 7.10019V25.8241C0 27.332 0.932065 28.3039 2.45396 28.3039C3.97586 28.3039 4.90793 27.332 4.90793 25.8241V7.10019C4.90793 5.59234 5.7911 4.66887 7.26411 4.66887C8.73712 4.66887 9.47363 5.49546 9.6203 7.10019L11.0933 21.4474C11.5838 26.0194 14.0882 28.3039 18.5546 28.3039C23.0209 28.3039 25.5253 26.0179 26.0158 21.4474L27.4888 7.10019C27.6355 5.49546 28.4209 4.66887 29.845 4.66887C31.2691 4.66887 32.2012 5.59234 32.2012 7.10019V25.8241C32.2012 27.332 33.1332 28.3039 34.6551 28.3039C36.177 28.3039 37.1091 27.332 37.1091 25.8241V7.10019C37.1091 2.72351 34.3602 0 29.9428 0Z" fill="#14C850">
+                  </path>
+                </svg>
+              </div>
+              <div data-svg-wrapper="" class="hc560-5" style="left: 130.69px; top: 51.20px; position: absolute">
+                <svg width="5" height="23" viewBox="0 0 5 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2.45396 0C0.932064 0 0 0.973463 0 2.47975V20.3287C0 21.8365 0.932064 22.8084 2.45396 22.8084C3.97586 22.8084 4.90793 21.8365 4.90793 20.3287V2.47975C4.90793 0.971901 3.97586 0 2.45396 0Z" fill="#14C850">
+                  </path>
+                </svg>
+              </div>
+              <div data-svg-wrapper="" class="hc560-5" style="left: 130.15px; top: 42.74px; position: absolute">
+                <svg width="6" height="6" viewBox="0 0 6 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2.99491 5.83609C4.76283 5.83609 5.98981 4.62043 5.98981 2.91883C5.98981 1.21722 4.76126 0 2.99491 0C1.22856 0 0 1.21566 0 2.91726C0 4.61887 1.22698 5.83453 2.99491 5.83453" fill="#14C850">
+                  </path>
+                </svg>
+              </div>
+              <div data-svg-wrapper="" class="hc560-5" style="left: 105.95px; top: 45.70px; position: absolute">
+                <svg width="20" height="29" viewBox="0 0 20 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M17.4254 23.4412C16.5422 23.4412 15.6085 23.8788 14.3816 23.8788C11.5349 23.8788 10.0619 22.3225 10.0619 19.2583V10.1159H16.9822C18.5041 10.1159 19.4361 9.28931 19.4361 7.92677C19.4361 6.56424 18.5041 5.73765 16.9822 5.73765H10.0619V2.47975C10.0619 0.971901 9.12982 0 7.65681 0C6.1838 0 5.25173 0.973463 5.25173 2.47975V5.73765H2.45396C0.932064 5.73765 0 6.56424 0 7.92677C0 9.28931 0.932064 10.1159 2.45396 10.1159H5.25173V19.2583C5.25173 24.9475 8.73712 28.4992 14.3816 28.4992C16.64 28.4992 19.6822 27.8664 19.6822 25.7757C19.6822 24.5116 18.8479 23.4412 17.4238 23.4412" fill="#14C850">
+                  </path>
+                </svg>
+              </div>
+              <div data-svg-wrapper="" class="hc560-5" style="left: 28.49px; top: 81.51px; position: absolute">
+                <svg width="8" height="11" viewBox="0 0 8 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M0 6.95643H1.2049C1.34526 8.55335 2.50759 9.15024 3.97902 9.15024C5.29589 9.15024 6.43141 8.58148 6.43141 7.42832V7.33144C6.43141 6.38767 5.75956 5.87359 3.65729 5.51265C1.19071 5.09545 0.36431 4.23605 0.36431 2.83289V2.69382C0.36431 1.20784 1.69538 0 3.79765 0C5.74537 0 7.20261 0.957836 7.42655 2.9282H6.22165C6.0529 1.6516 5.12872 1.02659 3.79765 1.02659C2.46658 1.02659 1.52821 1.6516 1.52821 2.67819V2.77507C1.52821 3.69072 2.10227 4.16261 4.06418 4.48293C6.40459 4.85794 7.6095 5.64859 7.6095 7.25957V7.39863C7.6095 8.96743 6.26423 10.1893 3.92382 10.1893C1.58341 10.1893 0.111974 9.07837 0 6.95487" fill="#14C850">
+                  </path>
+                </svg>
+              </div>
+              <div data-svg-wrapper="" class="hc560-5" style="left: 36.56px; top: 81.68px; position: absolute">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7.78929 9.85651L6.75313 7.16269H2.24106L1.2049 9.85651H0L3.88124 0H5.16973L9.05096 9.85651H7.78929ZM2.63375 6.15016H6.36044L4.49631 1.30472L2.63218 6.15016H2.63375Z" fill="#14C850">
+                  </path>
+                </svg>
+              </div>
+              <div data-svg-wrapper="" class="hc560-5" style="left: 46.33px; top: 78.68px; position: absolute">
+                <svg width="8" height="14" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M0 9.14868V2.99852H1.19071V9.10649C1.19071 11.0081 2.12908 11.9659 3.88124 11.9659C5.63339 11.9659 6.54338 10.994 6.54338 9.09243V2.99852H7.73409V9.13462C7.73409 11.5503 6.4314 13.0222 3.88124 13.0222C1.33107 13.0222 0 11.5784 0 9.14868ZM3.02645 1.88755L4.67925 0H6.4866L4.27236 1.88755H3.02487H3.02645Z" fill="#14C850">
+                  </path>
+                </svg>
+              </div>
+              <div data-svg-wrapper="" class="hc560-5" style="left: 55.89px; top: 81.68px; position: absolute">
+                <svg width="9" height="10" viewBox="0 0 9 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M0 9.85651V0H3.2504C6.09548 0 8.05581 1.66567 8.05581 4.7345V5.12357C8.05581 8.16428 6.12229 9.85808 3.2504 9.85808H0V9.85651ZM1.19071 8.82992H3.15262C5.40787 8.82992 6.8241 7.6502 6.8241 5.12357V4.7345C6.8241 2.236 5.42364 1.02815 3.12423 1.02815H1.19071V8.82992Z" fill="#14C850">
+                  </path>
+                </svg>
+              </div>
+              <div data-svg-wrapper="" class="hc560-5" style="left: 65.46px; top: 81.68px; position: absolute">
+                <svg width="7" height="10" viewBox="0 0 7 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M0 9.85651V0H6.54338V1.02815H1.18913V4.30324H6.12229V5.33139H1.18913V8.82992H6.61277V9.85651H0Z" fill="#14C850">
+                  </path>
+                </svg>
+              </div>
+            </div>
+            <div class="hc560-12" style="width: 385.59px; justify-content: center; align-items: flex-start; gap: 49.58px; display: inline-flex; flex-wrap: wrap; align-content: flex-start">
+              <div class="hc560-17" style="width: 162px; flex-direction: column; justify-content: flex-start; align-items: center; gap: 8.26px; display: inline-flex">
+                <img class="hc560-72" style="width: 97px; height: 96px" src="assets/hc560-20.png" decoding="async" loading="lazy">
+                <div class="hc560-19" style="width: 214px; text-align: center; color: black; font-size: 21px; font-family: Elza; font-weight: 700; word-wrap: break-word">3 modos de intensidade </div>
+                <div class="hc560-20" style="width: 162px; text-align: center; color: black; font-size: 16px; font-family: Elza; font-weight: 400; word-wrap: break-word">Padrão, Suave e Massagem para cada necessidade. </div>
+              </div>
+              <div class="hc560-17" style="width: 162px; flex-direction: column; justify-content: flex-start; align-items: center; gap: 8.26px; display: inline-flex">
+                <img class="hc560-73" style="width: 96px; height: 95px" src="assets/hc560-21.png" decoding="async" loading="lazy">
+                <div class="hc560-23" style="align-self: stretch; text-align: center; color: black; font-size: 21px; font-family: Elza; font-weight: 700; word-wrap: break-word">Modo <br>Dinâmico</div>
+                <div class="hc560-24" style="align-self: stretch; text-align: center; color: black; font-size: 16px; font-family: Elza; font-weight: 400; word-wrap: break-word">10 níveis de pressão para o seu conforto.</div>
+              </div>
+              <div class="hc560-17" style="width: 162px; flex-direction: column; justify-content: flex-start; align-items: center; gap: 8.26px; display: inline-flex">
+                <img class="hc560-72" style="width: 97px; height: 96px" src="assets/hc560-22.png" decoding="async" loading="lazy">
+                <div class="hc560-23" style="align-self: stretch; text-align: center; color: black; font-size: 21px; font-family: Elza; font-weight: 700; word-wrap: break-word">Bico giratório <br>360°</div>
+                <div class="hc560-24" style="align-self: stretch; text-align: center; color: black; font-size: 16px; font-family: Elza; font-weight: 400; word-wrap: break-word">Alcance em todas as áreas da boca.  </div>
+              </div>
+              <div class="hc560-17" style="width: 162px; flex-direction: column; justify-content: flex-start; align-items: center; gap: 8.26px; display: inline-flex">
+                <img class="hc560-75" style="width: 96px; height: 96px" src="assets/hc560-23.png" decoding="async" loading="lazy">
+                <div class="hc560-31" style="width: 196px; text-align: center; color: black; font-size: 21px; font-family: Elza; font-weight: 700; word-wrap: break-word">Reservatório <br>de 280 ml </div>
+                <div class="hc560-24" style="align-self: stretch; text-align: center; color: black; font-size: 16px; font-family: Elza; font-weight: 400; word-wrap: break-word">Reabastecimento fácil e rápido sob a torneira.</div>
+              </div>
+              <div class="hc560-13" style="width: 195px; overflow: hidden; flex-direction: column; justify-content: flex-start; align-items: center; gap: 8.26px; display: inline-flex">
+                <img class="hc560-75" style="width: 96px; height: 96px" src="assets/hc560-24.png" decoding="async" loading="lazy">
+                <div class="hc560-15" style="width: 186px; text-align: center; color: black; font-size: 21px; font-family: Elza; font-weight: 700; word-wrap: break-word">Jatos pulsantes de alta frequência</div>
+                <div class="hc560-24" style="align-self: stretch; text-align: center; color: black; font-size: 16px; font-family: Elza; font-weight: 400; word-wrap: break-word">Remoção de impurezas com suavidade e precisão. </div>
+              </div>
+            </div>
+            <div class="hc560-33" style="flex-direction: column; justify-content: center; align-items: flex-start; gap: 17.63px; display: flex">
+              <div class="hc560-41" style="width: 385.59px; height: 350px; position: relative; overflow: hidden; border-radius: 16px; background-image: url(assets/hc560-25.png); background-size: 100% 100%; background-repeat: no-repeat">
+</div>
+              <div class="hc560-80" style="width: 385.59px; height: 350px; position: relative; overflow: hidden; border-radius: 16px; background-image: url(assets/hc560-27.png); background-size: 100% 100%; background-repeat: no-repeat">
+</div>
+              <div class="hc560-35" style="width: 386px; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 16.53px; display: flex">
+                <div class="hc560-36" style="align-self: stretch; text-align: center; color: black; font-size: 35px; font-family: Elza; font-weight: 400; word-wrap: break-word">Complementa a limpeza <br>onde a escova não alcança</div>
+                <div class="hc560-37" style="align-self: stretch; text-align: center; color: black; font-size: 21px; font-family: Elza; font-weight: 400; word-wrap: break-word">O Clearpik Personal remove resíduos e impurezas acumulados entre os dentes e abaixo da linha da gengiva. Alcança áreas de difícil acesso para as escovas tradicionais, proporcionando uma sensação de higiene e frescor profunda.</div>
+              </div>
+            </div>
+            <div class="hc560-33" style="flex-direction: column; justify-content: center; align-items: flex-start; gap: 17.63px; display: flex">
+              <img class="hc560-41" style="width: 385.59px; height: 350px; position: relative; border-radius: 16px" src="assets/hc560-29.png" decoding="async" loading="lazy">
+              <div class="hc560-35" style="width: 386px; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 16.53px; display: flex">
+                <div class="hc560-36" style="align-self: stretch; text-align: center; color: black; font-size: 35px; font-family: Elza; font-weight: 400; word-wrap: break-word">Pulsos invisíveis, <br>cuidado perceptível</div>
+                <div class="hc560-37" style="align-self: stretch; text-align: center; color: black; font-size: 21px; font-family: Elza; font-weight: 400; word-wrap: break-word">A combinação de pressão da água com pulsos de alta frequência (1.200 a 1.400 por minuto) auxilia a desprender detritos com suavidade e precisão. </div>
+              </div>
+            </div>
+            <div class="hc560-82" style="width: 535px; height: 986px; position: relative; background: #F5F5F5; overflow: hidden">
+              <div class="hc560-33" style="left: 74px; top: 30px; position: absolute; flex-direction: column; justify-content: center; align-items: flex-start; gap: 33px; display: inline-flex">
+                <div class="hc560-41" style="width: 385.59px; height: 350px; position: relative; background: white; overflow: hidden; border-radius: 16px">
+                  <img class="hc560-83" style="width: 338px; height: 350px; left: 17px; top: 0.34px; position: absolute" src="assets/hc560-30.png" decoding="async" loading="lazy">
+                </div>
+                <div class="hc560-35" style="width: 386px; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 12px; display: flex">
+                  <div class="hc560-36" style="align-self: stretch; text-align: center; color: black; font-size: 35px; font-family: Elza; font-weight: 400; word-wrap: break-word">Ajustes simples para a sua preferência</div>
+                  <div class="hc560-37" style="align-self: stretch; text-align: center; color: black; font-size: 21px; font-family: Elza; font-weight: 400; word-wrap: break-word">Escolha entre os 3 modos<br>de uso com um toque rápido. </div>
+                </div>
+                <img class="hc560-84" style="width: 335px; height: 367.50px" src="assets/hc560-31.png" decoding="async" loading="lazy">
+              </div>
+            </div>
+            <div class="hc560-33" style="flex-direction: column; justify-content: center; align-items: flex-start; gap: 17.63px; display: flex">
+              <img class="hc560-41" style="width: 385.59px; height: 350px; position: relative; border-radius: 16px" src="assets/hc560-32.png" decoding="async" loading="lazy">
+              <div class="hc560-35" style="width: 386px; flex-direction: column; justify-content: flex-start; align-items: center; gap: 16.53px; display: flex">
+                <div class="hc560-36" style="align-self: stretch; text-align: center; color: black; font-size: 35px; font-family: Elza; font-weight: 400; word-wrap: break-word">Dez níveis de conforto<br>a sua escolha</div>
+                <div class="hc560-51" style="width: 350px; text-align: center; color: black; font-size: 21px; font-family: Elza; font-weight: 400; word-wrap: break-word">Ao ativar o Modo Dinâmico, você conta com 10 níveis de pressão ajustáveis para encontrar a intensidade ideal para o seu sorriso. </div>
+              </div>
+            </div>
+            <div class="hc560-82" style="width: 536px; height: 1099px; position: relative; background: #F5F5F5; overflow: hidden">
+              <div class="hc560-33" style="left: 74.50px; top: 134.81px; position: absolute; flex-direction: column; justify-content: center; align-items: flex-start; gap: 27px; display: inline-flex">
+                <img class="hc560-41" style="width: 385.59px; height: 350px; position: relative; background: white; border-radius: 16px" src="assets/hc560-33.png" decoding="async" loading="lazy">
+                <div class="hc560-35" style="width: 386px; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 16.53px; display: flex">
+                  <div class="hc560-37" style="align-self: stretch; text-align: center; color: black; font-size: 21px; font-family: Elza; font-weight: 400; word-wrap: break-word">O bico com rotação 360° facilita o direcionamento do jato para todos os cantos da boca. </div>
+                </div>
+              </div>
+              <div class="hc560-33" style="left: 74.50px; top: 606.81px; position: absolute; flex-direction: column; justify-content: center; align-items: flex-start; gap: 27px; display: inline-flex">
+                <img class="hc560-41" style="width: 385.59px; height: 350px; position: relative; background: white; border-radius: 16px" src="assets/hc560-34.png" decoding="async" loading="lazy">
+                <div class="hc560-35" style="width: 386px; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 16.53px; display: flex">
+                  <div class="hc560-37" style="align-self: stretch; text-align: center; color: black; font-size: 21px; font-family: Elza; font-weight: 400; word-wrap: break-word">O amplo reservatório de 280 ml possui abertura prática para reabastecimento fácil e rápido diretamente na torneira. </div>
+                </div>
+              </div>
+              <div class="hc560-53" style="width: 328px; left: 103px; top: 30.81px; position: absolute; text-align: center; color: black; font-size: 35px; font-family: Elza; font-weight: 400; word-wrap: break-word">Praticidade projetada para o manuseio</div>
+            </div>
+            <div class="hc560-33" style="flex-direction: column; justify-content: center; align-items: flex-start; gap: 17.63px; display: flex">
+              <img class="hc560-41" style="width: 385.59px; height: 350px; position: relative; border-radius: 16px" src="assets/hc560-35.png" decoding="async" loading="lazy">
+              <div class="hc560-35" style="width: 386px; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 16.53px; display: flex">
+                <div class="hc560-36" style="align-self: stretch; text-align: center; color: black; font-size: 35px; font-family: Elza; font-weight: 400; word-wrap: break-word">Pronto para acompanhar sua rotina</div>
+                <div class="hc560-37" style="align-self: stretch; text-align: center; color: black; font-size: 21px; font-family: Elza; font-weight: 400; word-wrap: break-word">Recarregável com cabo de entrada USB-C e encaixe próprio para o irrigador*. Bivolt e com desligamento automático após 2 minutos, foi desenvolvido para facilitar o cuidado bucal onde você estiver.<br>
+                  <br>*Cabo de carregamento incluído.</div>
+                </div>
+              </div>
+              <div class="hc560-33" style="flex-direction: column; justify-content: center; align-items: flex-start; gap: 17.63px; display: flex">
+                <img class="hc560-41" style="width: 385.59px; height: 350px; position: relative; border-radius: 16px" src="assets/hc560-36.png" decoding="async" loading="lazy">
+                <div class="hc560-35" style="width: 386px; flex-direction: column; justify-content: flex-start; align-items: center; gap: 16.53px; display: flex">
+                  <div class="hc560-36" style="align-self: stretch; text-align: center; color: black; font-size: 35px; font-family: Elza; font-weight: 400; word-wrap: break-word">Resistente à água </div>
+                  <div class="hc560-60" style="width: 320px; text-align: center; color: black; font-size: 21px; font-family: Elza; font-weight: 400; word-wrap: break-word">Com classificação IPX7 à prova d'água, o irrigador suporta submersão de até 1 metro de profundidade por até 30 minutos em água. Uma proteção que garante total tranquilidade, liberdade e segurança no uso.<br>
+                  </div>
+                </div>
+                <div class="hc560-33" style="flex-direction: column; justify-content: center; align-items: flex-start; gap: 17.63px; display: flex">
+                  <img class="hc560-41" style="width: 385.59px; height: 350px; position: relative; border-radius: 16px" src="assets/hc560-37.png" decoding="async" loading="lazy">
+                  <div class="hc560-35" style="width: 386px; flex-direction: column; justify-content: flex-start; align-items: center; gap: 16.53px; display: flex">
+                    <div class="hc560-36" style="align-self: stretch; text-align: center; color: black; font-size: 35px; font-family: Elza; font-weight: 400; word-wrap: break-word">Higienização<br>sem complicações</div>
+                    <div class="hc560-37" style="align-self: stretch; text-align: center; color: black; font-size: 21px; font-family: Elza; font-weight: 400; word-wrap: break-word">Com poucos movimentos, você complementa a escovação do dia a dia. Basta posicionar o bico na boca, mantê-la levemente aberta e percorrer os dentes traseiros até os da frente. </div>
+                  </div>
+                </div>
+              </div>
+              <div class="hc560-64" style="width: 428px; height: 1127px; position: relative; background: #E2FFEC; overflow: hidden">
+                <div data-svg-wrapper="" class="hc560-5" style="left: -55.26px; top: 16.91px; position: absolute">
+                  <svg width="428" height="411" viewBox="0 0 428 411" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path opacity="0.3" d="M379.267 0C315.16 0 279.548 34.5804 272.407 103.038L251.031 311.247C248.903 331.723 236.063 342.29 213.977 342.29C191.891 342.29 179.074 331.7 176.946 311.247L155.57 103.038C148.452 34.5804 112.817 0 48.7105 0C-15.3958 0 -55.2649 39.5011 -55.2649 103.038L-55.2649 374.761C-55.2649 396.643 -41.7387 410.748 -19.6528 410.748C2.43308 410.748 15.9593 396.643 15.9593 374.761L15.9593 103.038C15.9593 81.1563 28.7759 67.755 50.1524 67.755C71.5288 67.755 82.2169 79.7504 84.3454 103.038L105.722 311.247C112.84 377.596 149.184 410.748 214 410.748C278.816 410.748 315.16 377.573 322.278 311.247L343.654 103.038C345.783 79.7504 357.181 67.755 377.848 67.755C398.514 67.755 412.041 81.1563 412.041 103.038L412.041 374.761C412.041 396.643 425.567 410.748 447.653 410.748C469.739 410.748 483.265 396.643 483.265 374.761V103.038C483.265 39.5237 443.373 0 379.267 0Z" fill="url(#paint0_linear_65_381)">
+                    </path>
+                    <defs>
+                      <linearGradient id="paint0_linear_65_381" x1="214" y1="0" x2="214" y2="410.748" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#14C850">
+                        </stop>
+                        <stop offset="1" stop-color="#0A6227" stop-opacity="0">
+                        </stop>
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+                <div class="hc560-85" style="left: 21px; top: 28.11px; position: absolute; flex-direction: column; justify-content: center; align-items: center; gap: 17.63px; display: inline-flex">
+                  <img class="hc560-86" style="width: 386px; height: 433px" src="assets/hc560-38.png" decoding="async" loading="lazy">
+                  <div class="hc560-35" style="width: 315.08px; flex-direction: column; justify-content: flex-start; align-items: center; gap: 16.53px; display: flex">
+                    <div class="hc560-66" style="align-self: stretch; text-align: center; color: black; font-size: 35.25px; font-family: Elza; font-weight: 400; word-wrap: break-word">Ficha técnica</div>
+                    <div class="hc560-67" style="align-self: stretch; text-align: center">
+<div class="hc560-ficha-item"><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 700; line-height: 28px; word-wrap: break-word">Marca:</span><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 400; line-height: 28px; word-wrap: break-word"> Multi Saúde
+                      </span></div>
+<div class="hc560-ficha-item"><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 700; line-height: 28px; word-wrap: break-word">Dimensões:</span><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 400; line-height: 28px; word-wrap: break-word"> 7,35 x 8,8 x 22,7cm 
+                      </span></div>
+<div class="hc560-ficha-item"><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 700; line-height: 28px; word-wrap: break-word">Peso líquido:</span><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 400; line-height: 28px; word-wrap: break-word"> 358 g
+                      </span></div>
+<div class="hc560-ficha-item"><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 700; line-height: 28px; word-wrap: break-word">Energia: </span><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 400; line-height: 28px; word-wrap: break-word">voltagem 100-240 V (Bivolt) 
+                      </span></div>
+<div class="hc560-ficha-item"><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 700; line-height: 28px; word-wrap: break-word">Potência:</span><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 400; line-height: 28px; word-wrap: break-word"> 5 W 
+                      </span></div>
+<div class="hc560-ficha-item"><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 700; line-height: 28px; word-wrap: break-word">Tempo de carga:</span><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 400; line-height: 28px; word-wrap: break-word"> 4 horas.
+                      </span></div>
+<div class="hc560-ficha-item"><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 700; line-height: 28px; word-wrap: break-word">Desempenho: </span><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 400; line-height: 28px; word-wrap: break-word">pressão de 20 a 115 PSI e ruído discreto abaixo de 72 decibéis.</span></div>
+<div class="hc560-ficha-item"><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 400; line-height: 28px; word-wrap: break-word">Função memória automática para o último modo ativo por mais de 10 segundos.
+                      </span></div>
+<div class="hc560-ficha-item"><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 700; line-height: 28px; word-wrap: break-word">Conteúdo da embalagem</span><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 400; line-height: 28px; word-wrap: break-word">: 1 irrigador oral portátil, 2 bicos clássicos, 1 cabo de carregamento e 1 manual de instruções.
+                      </span></div>
+<div class="hc560-ficha-item"><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 700; line-height: 28px; word-wrap: break-word">Garantia: </span><span style="color: #424245; font-size: 20px; font-family: Elza; font-weight: 400; line-height: 28px; word-wrap: break-word">1 ano 
+                      </span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <script src="https://djibrasil.vteximg.com.br/arquivos/processor.js?v=20260602-tabs"></script>
+        <script>
+        // lamina-qa - escala proporcional da prancheta mobile pela largura do container (ate 856px de largura).
+        (() => {
+          const MAX_WIDTH = 856;
+          const layout = document.querySelector(".lamina-layout-mobile[data-lamina-fit]");
+          const board = layout && layout.querySelector(":scope > [data-lamina-fit-board]");
+          if (!board) return;
+        
+          const designWidth = parseFloat(board.dataset.laminaFitBoard) || 428;
+          layout.style.setProperty("--lamina-fit-width", `${designWidth}px`);
+        
+          function fit() {
+            const width = layout.clientWidth;
+            if (!width) return;
+            const scale = Math.min(width, MAX_WIDTH) / designWidth;
+            layout.style.setProperty("--lamina-fit-scale", scale);
+            layout.style.setProperty("--lamina-fit-offset", `${(width - designWidth * scale) / 2}px`);
+            layout.style.setProperty("--lamina-fit-height", `${board.offsetHeight * scale}px`);
+          }
+        
+          fit();
+          if ("ResizeObserver" in window) {
+            const observer = new ResizeObserver(fit);
+            observer.observe(layout);
+            observer.observe(board);
+          }
+          window.addEventListener("resize", fit, { passive: true });
+          window.addEventListener("load", fit);
+          document.fonts?.ready?.then(fit);
+        })();
+        </script>
+      </body>
+    </html>
